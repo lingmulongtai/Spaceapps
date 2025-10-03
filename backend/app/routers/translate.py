@@ -11,7 +11,11 @@ router = APIRouter(prefix="/translate", tags=["translate"])
 async def placeholder_translate(payload: TranslationRequest):
   """Stub endpoint to integrate DeepL translation with rule-based fallback."""
 
-  service = TranslationService(api_key=settings.deepl_api_key)
+  service = TranslationService(
+    api_key=settings.deepl_api_key,
+    api_base=settings.deepl_api_url,
+    timeout=settings.deepl_timeout_seconds,
+  )
   result = await service.translate(payload.text, payload.target_language)
   return TranslationResponse(**result)
 

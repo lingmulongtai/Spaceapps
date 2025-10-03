@@ -20,8 +20,8 @@ async def gibs_tile_preview(req: TileRequest):
   """Fetch a simple NASA GIBS WMS preview tile encoded as base64 PNG."""
 
   bbox = req.bbox or [-90, -180, 90, 180]
-  width = req.width or 640
-  height = req.height or 320
+  width = req.width
+  height = req.height
   layer = req.layer or DEFAULT_LAYER
   time_param = req.time or DEFAULT_TIME
 

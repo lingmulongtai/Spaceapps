@@ -12,4 +12,5 @@ class TranslationResponse(BaseModel):
   target_language: str
   status: str
   note: str | None = None
+  detected_source_language: str | None = None
 

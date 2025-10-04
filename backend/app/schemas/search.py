@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 
@@ -21,4 +23,7 @@ class SearchResult(BaseModel):
   title: str
   preview_url: str | None = None
   description: str | None = None
+  source: str | None = None
+  link: str | None = None
+  metadata: dict[str, Any] | None = None
 

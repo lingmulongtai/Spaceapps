@@ -65,7 +65,7 @@ async def search_catalogs(query: SearchQuery) -> list[SearchResult]:
 
   aggregated: dict[str, SearchResult] = {}
   for block in results:
-    if isinstance(block, Exception):
+    if isinstance(block, BaseException):
       LOGGER.warning("Catalog source failed", exc_info=block)
       continue
     for item in block:
@@ -95,6 +95,19 @@ def _value_matches(text: str, value: Any) -> bool:
   return False
 
 
+def _extract_href(node: Any) -> str | None:
+  if node is None:
+    return None
+  href_value = node.get("href") if hasattr(node, "get") else None
+  if isinstance(href_value, str):
+    return href_value
+  if isinstance(href_value, list):
+    for entry in href_value:
+      if isinstance(entry, str):
+        return entry
+  return None
+
+
 async def fetch_pds_mro(client: httpx.AsyncClient, query: SearchQuery) -> list[SearchResult]:
   response = await client.get(PDS_MRO_URL)
   response.raise_for_status()
@@ -102,7 +115,7 @@ async def fetch_pds_mro(client: httpx.AsyncClient, query: SearchQuery) -> list[S
 
   results: list[SearchResult] = []
   for anchor in soup.select("a[href]"):
-    href = anchor.get("href")
+    href = _extract_href(anchor)
     if not href:
       continue
     if not href.startswith("/volumes/mro/") and "release" not in href:
@@ -133,9 +146,10 @@ async def fetch_tess_data_products(client: httpx.AsyncClient, query: SearchQuery
 
   results: list[SearchResult] = []
   for section in soup.select("div#content article, div.article, div#main") or [soup]:
+    heading_tag = section.find("h2") or section.find("h3")
     for anchor in section.select("a[href]"):
       text = anchor.get_text(strip=True)
-      href = anchor.get("href")
+      href = _extract_href(anchor)
       if not text or not href:
         continue
       if text.lower().startswith("download") or text.lower().startswith("contact"):
@@ -152,7 +166,7 @@ async def fetch_tess_data_products(client: httpx.AsyncClient, query: SearchQuery
           preview_url=None,
           source="NASA HEASARC TESS",
           link=url,
-          metadata={"section": section.find("h2").get_text(strip=True) if section.find("h2") else "TESS"},
+          metadata={"section": heading_tag.get_text(strip=True) if heading_tag else "TESS"},
         )
       )
   return results
@@ -302,7 +316,7 @@ async def fetch_lro_data_products(client: httpx.AsyncClient, query: SearchQuery)
     section_title = heading.get_text(strip=True) if heading else "LRO Data"
     for anchor in section.select("a[href]"):
       text = anchor.get_text(strip=True)
-      href = anchor.get("href")
+      href = _extract_href(anchor)
       if not text or not href:
         continue
       if text.lower().startswith("download") or text.lower().startswith("pdf"):
@@ -336,7 +350,7 @@ async def fetch_cwfis_resources(client: httpx.AsyncClient, query: SearchQuery) -
 
   for section in sections:
     for anchor in section.select("a[href]"):
-      href = anchor.get("href")
+      href = _extract_href(anchor)
       title = anchor.get_text(strip=True)
       if not href or not title:
         continue
@@ -367,7 +381,7 @@ async def fetch_geoca_highlights(client: httpx.AsyncClient, query: SearchQuery) 
   results: list[SearchResult] = []
   spotlight_section = soup.select_one("#spotlight, .spotlight") or soup
   for block in spotlight_section.select("a[href]"):
-    href = block.get("href")
+    href = _extract_href(block)
     title = block.get_text(strip=True)
     if not href or not title:
       continue
@@ -427,7 +441,7 @@ async def fetch_inde_resources(client: httpx.AsyncClient, query: SearchQuery) ->
 
   results: list[SearchResult] = []
   for anchor in soup.select("a[href]"):
-    href = anchor.get("href")
+    href = _extract_href(anchor)
     title = anchor.get_text(strip=True)
     if not href or not title:
       continue
@@ -457,7 +471,7 @@ async def fetch_inpe_catalog(client: httpx.AsyncClient, query: SearchQuery) -> l
 
   results: list[SearchResult] = []
   for link in soup.select("a[href]"):
-    href = link.get("href")
+    href = _extract_href(link)
     title = link.get_text(strip=True)
     if not href or not title:
       continue

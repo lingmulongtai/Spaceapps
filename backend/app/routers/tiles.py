@@ -3,9 +3,10 @@ from datetime import datetime
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from ..schemas.tiles import TileRequest, TimelineFrame
+from ..services.tiles import tile_metadata_service
 
 router = APIRouter(prefix="/tiles", tags=["tiles"])
 
@@ -66,17 +67,21 @@ async def gibs_tile_preview(req: TileRequest):
 
 
 @router.get("/timeline", response_model=list[TimelineFrame])
-async def placeholder_tile_timeline(item_id: str):
-  """Stub for timeline tile availability (video/time series)."""
+async def tile_timeline(
+  layer: str = Query(..., description="GIBS layer identifier"),
+  limit: int | None = Query(60, gt=0, le=500, description="Maximum number of timestamps"),
+):
+  """Return available timestamps for a given GIBS layer."""
 
-  return [
+  dates = await tile_metadata_service.get_available_dates(layer, limit=limit)
+
+  frames = [
     TimelineFrame(
-      timestamp="2024-01-01T00:00:00Z",
-      asset_url=f"https://example.com/tiles/{item_id}/0.png",
-    ),
-    TimelineFrame(
-      timestamp="2024-01-01T00:05:00Z",
-      asset_url=f"https://example.com/tiles/{item_id}/1.png",
-    ),
+      timestamp=f"{date}T00:00:00Z",
+      asset_url=f"https://gibs.earthdata.nasa.gov/wms/epsg4326/best/{layer}/default/{date}/GoogleMapsCompatible_Level8/{{z}}/{{y}}/{{x}}.jpg",
+    )
+    for date in dates
   ]
+
+  return frames
 

@@ -28,6 +28,9 @@ const DATASET_SOURCE_PREFIX = "dataset-source-";
 const DATASET_LAYER_PREFIX = "dataset-layer-";
 const OVERLAY_SOURCE_PREFIX = "overlay-source-";
 const OVERLAY_LAYER_PREFIX = "overlay-layer-";
+const DEFAULT_MIN_ZOOM = 0;
+const DEFAULT_MAX_ZOOM = 18;
+const ZOOM_EPSILON = 0.05;
 
 export function MapViewport({
   datasetId = DATASETS[0]?.id ?? "earth-true-color",
@@ -74,8 +77,8 @@ export function MapViewport({
       },
       center: initialDataset?.initialView.center ?? [0, 0],
       zoom: initialDataset?.initialView.zoom ?? 2,
-      minZoom: initialDataset?.minZoom ?? 0,
-      maxZoom: initialDataset?.maxZoom ?? 14,
+      minZoom: initialDataset?.minZoom ?? DEFAULT_MIN_ZOOM,
+      maxZoom: initialDataset?.maxZoom ?? DEFAULT_MAX_ZOOM,
       attributionControl: true,
     });
 
@@ -93,7 +96,9 @@ export function MapViewport({
   // update overlay defaults when dataset changes
   useEffect(() => {
     if (!dataset) return;
-    const defaultDate = dataset.defaultDate ?? availableDates?.[0];
+    const derivedDates = availableDates && availableDates.length > 0 ? availableDates : dataset.availableDates ?? [];
+    const dates = derivedDates.length > 0 ? derivedDates : dataset.availableDates ?? [];
+    const defaultDate = dataset.supportsTime ? dataset.defaultDate ?? dates[0] : undefined;
     setSelectedDate(defaultDate);
     setOverlaySelection(
       Object.fromEntries(dataset.overlays?.map((overlay) => [overlay.id, true]) ?? []),
@@ -101,8 +106,10 @@ export function MapViewport({
     onDatasetChange?.(dataset);
     onDateChange?.(defaultDate);
     if (mapRef.current) {
-      mapRef.current.setMinZoom(dataset.minZoom ?? 0);
-      mapRef.current.setMaxZoom(dataset.maxZoom ?? 22);
+      const minZoom = dataset.minZoom ?? DEFAULT_MIN_ZOOM;
+      const nativeMaxZoom = dataset.nativeMaxZoom ?? dataset.maxZoom ?? DEFAULT_MAX_ZOOM;
+      mapRef.current.setMinZoom(minZoom);
+      mapRef.current.setMaxZoom(nativeMaxZoom + ZOOM_EPSILON);
     }
   }, [dataset, onDatasetChange, availableDates, onDateChange]);
 
@@ -134,13 +141,15 @@ export function MapViewport({
       const sourceId = `${DATASET_SOURCE_PREFIX}${targetDataset.id}`;
       const layerId = `${DATASET_LAYER_PREFIX}${targetDataset.id}`;
 
+      const minZoom = targetDataset.minZoom ?? DEFAULT_MIN_ZOOM;
+      const maxZoom = targetDataset.nativeMaxZoom ?? targetDataset.maxZoom ?? DEFAULT_MAX_ZOOM;
+
       map.addSource(sourceId, {
         type: "raster",
         tiles: tileUrls,
         tileSize: targetDataset.tileSize ?? 256,
-        minzoom: targetDataset.minZoom,
-        maxzoom: targetDataset.maxZoom,
-        scheme: "xyz",
+        minzoom: minZoom,
+        maxzoom: maxZoom,
       });
 
       map.addLayer({
@@ -150,23 +159,22 @@ export function MapViewport({
         paint: {
           "raster-opacity": 0.85,
         },
-        minzoom: targetDataset.minZoom,
-        maxzoom: targetDataset.maxZoom,
+        minzoom: minZoom,
+        maxzoom: maxZoom + ZOOM_EPSILON,
       });
 
       targetDataset.overlays
         ?.filter((overlay) => overlaySelection[overlay.id] ?? true)
         .forEach((overlay) => {
-          const overlaySource = `${OVERLAY_SOURCE_PREFIX}${targetDataset.id}-${overlay.id}`;
+            const overlaySource = `${OVERLAY_SOURCE_PREFIX}${targetDataset.id}-${overlay.id}`;
           const overlayLayer = `${OVERLAY_LAYER_PREFIX}${targetDataset.id}-${overlay.id}`;
 
           map.addSource(overlaySource, {
             type: "raster",
             tiles: overlay.getTileUrls({ date }),
             tileSize: targetDataset.tileSize ?? 256,
-            minzoom: targetDataset.minZoom,
-            maxzoom: targetDataset.maxZoom,
-            scheme: "xyz",
+            minzoom: minZoom,
+            maxzoom: maxZoom,
           });
 
           map.addLayer({
@@ -176,8 +184,8 @@ export function MapViewport({
             paint: {
               "raster-opacity": overlay.opacity ?? 0.6,
             },
-            minzoom: targetDataset.minZoom,
-            maxzoom: targetDataset.maxZoom,
+            minzoom: minZoom,
+            maxzoom: maxZoom + ZOOM_EPSILON,
           });
         });
     },
@@ -286,17 +294,18 @@ export function MapViewport({
           {(dataset?.supportsTime || availableDates) && (
             <label className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Date</span>
-              <select
-                className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-xs text-slate-100 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40"
-                value={selectedDate ?? ""}
-                onChange={handleDateChange}
-              >
-                {(availableDates ?? dataset?.availableDates ?? []).map((date) => (
-                  <option key={date} value={date}>
-                    {date}
-                  </option>
-                ))}
-              </select>
+          <select
+            className="rounded-lg border border-white/20 bg-slate-900 px-2 py-1.5 text-xs text-slate-100 shadow-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/40"
+            value={selectedDate ?? ""}
+            onChange={handleDateChange}
+          >
+            <option value="">Latest available</option>
+            {(availableDates ?? dataset?.availableDates ?? []).map((date) => (
+              <option key={date} value={date}>
+                {date}
+              </option>
+            ))}
+          </select>
             </label>
           )}
         </div>

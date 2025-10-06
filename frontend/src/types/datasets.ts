@@ -28,5 +28,7 @@ export type DatasetDefinition = {
   defaultDate?: string;
   getTileUrls: (options: { date?: string }) => string[];
   overlays?: DatasetOverlay[];
+  layerId?: string;
+  nativeMaxZoom?: number;
 };
 

@@ -1,76 +1,205 @@
-# Orbital Imagery Exploration Toolkit
+# Spaceapps-concept
 
-SpaceApps concept project showcasing an end-to-end scaffold for exploring massive imagery sets with AI-powered search, temporal playback, and multilingual capabilities.
+Orbital Imagery Exploration Toolkit designed for NASA Space Apps concept work. The project scaffolds an end-to-end workflow for discovering, previewing, and translating massive remote-sensing datasets while remaining ready for deeper integrations.
 
-## Repository Structure
+## Why This Project Exists
 
-- `frontend/`: Next.js + Tailwind app with placeholder UI modules (`SearchPanel`, `MapViewport`, `TimelinePlayer`, `ResourcePanel`).
-- `backend/`: FastAPI service exposing catalog, tiles, translation, and health endpoints.
-- `venv/`: Python virtual environment for backend development.
+- Showcase a modern stack pairing a FastAPI backend with a Next.js frontend for planetary data discovery.
+- Provide an extensible baseline for catalog federation, temporal playback, and multilingual experiences.
+- Demonstrate how DeepL-powered translation can enrich scientific tooling with inclusive language support.
 
-## Getting Started
+---
 
-### Requirements
+## Feature Highlights
 
-- Node.js 18+
-- Python 3.11+
+- Unified catalog search that aggregates planned NASA and partner datasets.
+- Interactive map viewport with timeline playback hooks for NASA GIBS layers.
+- Translation widget backed by a DeepL-first backend service with rule-based fallback.
+- Modular services layer primed for STAC, COG, vector database, and analytics pipeline integrations.
+- Developer-friendly scaffolding with typed schemas, React Query, and Zustand state management.
 
-### Install & Run
+---
 
-```bash
+## Repository Layout
+
+- `frontend/` – Next.js 14 app with Tailwind CSS, API route proxies, and modular UI components.
+- `backend/` – FastAPI application exposing catalog, tiles, translate, and health endpoints.
+- `backup/venv_backup/` – Frozen copy of a Python virtual environment for reference only (not used in active development).
+- `Spaceapps photo.code-workspace` – VS Code workspace definition for optional editor setup.
+
+> The live virtual environment directory (`venv/`) is intentionally git-ignored. Create a fresh environment for your platform using the instructions below.
+
+---
+
+## Architecture Overview
+
+- **Frontend**: Next.js (App Router) with React Query for data fetching, Zustand for client state, and custom hooks for imagery previews and translation flows.
+- **Backend**: FastAPI service with routers for `/catalog`, `/tiles`, `/translate`, and `/health`. Each endpoint delegates to typed services located under `backend/app/services/`.
+- **Data Flow**: Frontend components call local Next.js API routes that proxy to the FastAPI backend. This keeps CORS configuration straightforward and centralizes external API credentials on the server.
+- **Translation**: `TranslationService` prioritizes the DeepL REST API (via `/api/translate` serverless endpoint expectation) with graceful fallback rules when the API key is missing.
+
+---
+
+## Prerequisites
+
+- Node.js 18.x or newer
+- npm 9.x (bundled with Node 18) or another compatible package manager
+- Python 3.11.x
+- PowerShell 7 (recommended on Windows) or a Unix-like shell
+- Git installed and authenticated with GitHub access to `Spaceapps-concept`
+
+Optional tooling:
+
+- `direnv` or similar to manage environment variables
+- `make` (if you plan to add command shortcuts)
+
+---
+
+## Quick Start (Windows-friendly)
+
+```powershell
+# Clone the repository
+git clone https://github.com/lingmulongtai/Spaceapps-concept.git
+cd Spaceapps-concept
+
+# Backend setup
 python -m venv venv
-./venv/Scripts/activate  # Windows PowerShell
+./venv/Scripts/Activate.ps1
+pip install --upgrade pip
 pip install -r backend/requirements.txt
 
+# Frontend setup
 cd frontend
 npm install
 
-# Run backend
-../venv/Scripts/uvicorn app.main:app --reload --app-dir ../backend
+# Run backend (from project root)
+cd ..
+./venv/Scripts/uvicorn app.main:app --reload --app-dir backend
 
-# In a new terminal for frontend
+# In a new terminal: run the frontend dev server
+cd frontend
 npm run dev
 ```
 
-Frontend served at `http://localhost:3000`, backend at `http://localhost:8000`.
+- Backend API: `http://localhost:8000`
+- Frontend app: `http://localhost:3000`
 
-## Environment Variables
+For macOS/Linux, replace activation scripts with `source venv/bin/activate` and adjust paths accordingly.
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `NEXT_PUBLIC_BACKEND_URL` | Base URL for frontend API proxy calls | `http://localhost:8000` |
-| `DEEPL_API_KEY` | Backend translation provider key (optional) | unset |
+---
 
-Create `backend/.env` for backend-specific settings and `frontend/.env.local` for frontend overrides.
+## Environment Configuration
 
-## Development Notes
+Create the following files before running the stack:
 
-- Frontend queries use React Query and Zustand for state management anchors.
-- Next.js API routes proxy to backend to keep CORS/simple config.
-- Backend services and schemas document where STAC/COG/vector DB integrations will connect.
-- Translation service prioritizes DeepL per user preference, with rule-based fallback stubbed.
+- `backend/.env`
+- `frontend/.env.local`
 
-## Next Steps
+Recommended variables:
 
-1. Replace mock responses with actual data sources (STAC catalogs, titiler, vector DB).
-2. Implement authentication/authorization if required for protected datasets.
-3. Add backend tests under `backend/tests` and CI workflows.
-4. Integrate `/api/translate` with real DeepL or alternative providers.
+| Variable | Scope | Description | Example |
+| --- | --- | --- | --- |
+| `DEEPL_API_KEY` | backend | DeepL Auth Key for production translation | `deepl-auth-key` |
+| `DEEPL_API_URL` | backend | Override base URL (useful for mock servers) | `https://api-free.deepl.com` |
+| `DEEPL_TIMEOUT_SECONDS` | backend | Request timeout for translation calls | `15` |
+| `NEXT_PUBLIC_BACKEND_URL` | frontend | Base URL for API proxy calls | `http://localhost:8000` |
+| `NEXT_PUBLIC_MAPBOX_TOKEN` | frontend | Optional if you wire Mapbox basemaps | `<token>` |
 
-Contributions and extensions welcome—reach out before modifying scaffolding conventions.
+> The backend automatically reads DeepL settings from `backend/.env` via Pydantic Settings. The frontend uses `NEXT_PUBLIC_*` variables to hydrate runtime config.
 
-## External Catalog Integrations
+---
 
-- NASA PDS Imaging Node Mars Reconnaissance Orbiter volumes: linkage seeded from https://pds-imaging.jpl.nasa.gov/volumes/mro.html.
-- NASA HEASARC TESS data products: listings scraped from https://heasarc.gsfc.nasa.gov/docs/tess/data-products.html.
-- International Moon Database interface for LROC datasets: JSON harvested via https://data.im-ldi.com/mds?MDS_SEARCH=%7B%22datasets%22%3A%5B%22luna_lroc_fi%22,%22luna_lroc_pds_nac_edrcdr%22,%22luna_lroc_pds_wac_edrcdr%22,%22luna_lroc_pds_rdr%22%5D,%22query%22:%7B%7D,%22map%22:%7B%7D%7D.
-- NASA Trek Web Services layers for Moon, Mars, and Ceres: REST calls to https://trek.nasa.gov/.
-- NASA Earthdata CMR collection search API: metadata pulled from https://search.earthdata.nasa.gov/ via https://cmr.earthdata.nasa.gov/search/collections.json.
-- NASA Lunar Reconnaissance Orbiter mission page: curated product links from https://science.nasa.gov/mission/lro/data-products/.
-- Canadian Wildland Fire Information System highlights: scraped from https://cwfis.cfs.nrcan.gc.ca/home.
-- GEO.ca spotlight and initiatives: aggregated via https://geo.ca/home/.
-- Canadian Space Agency datasets: fetched from https://donnees-data.asc-csa.gc.ca/dataset and targeted package IDs.
-- Brazilian INDE Visualizador landing resources: parsed from https://visualizador.inde.gov.br/.
-- INPE DGI catalog explore page: links harvested from https://www.dgi.inpe.br/catalogo/explore.
+## Development Workflow
 
-These sources feed the `/catalog/search` endpoint for federated mission discovery.
+- **Backend**
+  - Run `uvicorn app.main:app --reload --app-dir backend` from the project root with the virtual environment active.
+  - Implement services inside `backend/app/services/` and expose them via routers under `backend/app/routers/`.
+  - Add tests beneath `backend/tests/` using `pytest` (template forthcoming).
+
+- **Frontend**
+  - Use `npm run dev` for hot-reloading Next.js.
+  - API calls should go through the internal `/api/*` routes to piggyback on the Next.js server and avoid CORS issues.
+  - Shared state lives in `frontend/src/store/`; custom hooks for API access are in `frontend/src/hooks/`.
+
+- **Code Quality**
+  - `npm run lint` (frontend) ensures ESLint compliance.
+  - `npm run type-check` (if added) validates TypeScript typings.
+  - Backend formatting follows `black` and `ruff` (add to `requirements-dev.txt` as needed).
+
+- **Translation Testing**
+  - Without `DEEPL_API_KEY`, the backend returns stubbed translations for deterministic local testing.
+  - With the key set, ensure outbound requests succeed by calling `POST /translate/` directly or using the frontend Translation widget.
+
+---
+
+## API Surface Snapshot
+
+- `POST /catalog/search` – Aggregate imagery and dataset entries based on forthcoming STAC/mission integrations.
+- `GET /catalog/pipelines` – List registered analytics pipelines (placeholder).
+- `POST /catalog/ingest` – Stub for dataset registration payloads.
+- `POST /tiles/preview` – Fetch NASA GIBS imagery tiles and return base64-encoded PNG previews.
+- `GET /tiles/timeline` – Return timestamped assets for temporal playback per GIBS layer.
+- `POST /translate/` – Translate text to a target language using DeepL when configured.
+- `GET /health` – Lightweight readiness probe.
+
+Internal Next.js API routes mirror these backend endpoints to simplify client usage.
+
+---
+
+## Data Sources & Planned Integrations
+
+The catalog service is pre-wired to ingest or federate the following providers as the project matures:
+
+- NASA PDS Imaging Node (MRO volumes) – <https://pds-imaging.jpl.nasa.gov/volumes/mro.html>
+- NASA HEASARC TESS data products – <https://heasarc.gsfc.nasa.gov/docs/tess/data-products.html>
+- International Moon Database (LROC datasets) – <https://data.im-ldi.com>
+- NASA Trek Web Services (Moon, Mars, Ceres) – <https://trek.nasa.gov>
+- NASA Earthdata CMR – <https://cmr.earthdata.nasa.gov>
+- NASA Lunar Reconnaissance Orbiter mission products – <https://science.nasa.gov/mission/lro/data-products>
+- Canadian Wildland Fire Information System – <https://cwfis.cfs.nrcan.gc.ca/home>
+- GEO.ca initiatives – <https://geo.ca/home>
+- Canadian Space Agency open datasets – <https://donnees-data.asc-csa.gc.ca/dataset>
+- Brazilian INDE Visualizador – <https://visualizador.inde.gov.br>
+- INPE DGI catalog – <https://www.dgi.inpe.br/catalogo/explore>
+
+Each source ultimately feeds the `/catalog/search` endpoint once ingestion jobs and parsers are implemented.
+
+---
+
+## Roadmap
+
+1. **Data Federation** – Replace mock catalog responses with live STAC/COG queries and vector database indexing.
+2. **Analytics Pipelines** – Formalize `/catalog/pipelines` with user-submitted or curated analysis modules.
+3. **Temporal Playback** – Integrate frame scrubbing UI tied to NASA GIBS timeline responses.
+4. **User Accounts** – Evaluate authentication/authorization for protected datasets and collaborative workspaces.
+5. **Localization** – Expand translation coverage across UI copy, metadata, and dataset summaries via DeepL.
+6. **CI/CD** – Add automated testing, linting, and deployment workflows (GitHub Actions templates forthcoming).
+
+---
+
+## Contributing
+
+We welcome pull requests and issue reports as the concept evolves.
+
+1. Fork the repository and create a feature branch.
+2. Follow the setup instructions above.
+3. Add or update tests whenever you introduce new behavior.
+4. Submit a pull request detailing the motivation, behavior changes, and testing performed.
+
+Please open a GitHub issue to discuss significant architectural changes before implementation.
+
+---
+
+## Licensing & Attribution
+
+This concept repository is currently unlicensed. Until a license is added, reuse requires express permission from the maintainers.
+
+NASA data products referenced herein remain governed by their respective distribution policies. DeepL is a registered trademark of DeepL SE.
+
+---
+
+## Acknowledgements
+
+- NASA Space Apps Challenge for inspiring the concept brief.
+- Open-source contributors whose libraries power this stack (FastAPI, httpx, Next.js, React Query, Zustand, Tailwind CSS).
+- DeepL for enabling inclusive, multilingual scientific communication.

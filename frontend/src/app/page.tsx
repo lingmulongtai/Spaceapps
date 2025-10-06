@@ -134,10 +134,10 @@ export default function Home() {
         }}
         className="min-h-[60vh] xl:min-h-[66vh] 2xl:min-h-[70vh]"
         availableDates={availableDates}
-        onDateChange={(date) => {
-          if (preview && date) {
-            fetchPreview({ layer: preview.layer, startDate: date });
-          }
+        selectedDate={preview?.time?.slice(0, 10)}
+        onDateChange={({ dataset, date }) => {
+          const nextLayer = dataset.layerId ?? dataset.id;
+          fetchPreview({ layer: nextLayer, startDate: date });
         }}
       />
     ),

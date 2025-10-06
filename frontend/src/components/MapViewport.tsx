@@ -21,7 +21,8 @@ export type MapViewportProps = {
   onDatasetChange?: (dataset: DatasetDefinition) => void;
   className?: string;
   availableDates?: string[];
-  onDateChange?: (date: string | undefined) => void;
+  selectedDate?: string;
+  onDateChange?: (payload: { date: string | undefined; dataset: DatasetDefinition }) => void;
 };
 
 const DATASET_SOURCE_PREFIX = "dataset-source-";
@@ -42,6 +43,7 @@ export function MapViewport({
   onDatasetChange,
   className,
   availableDates,
+  selectedDate: externalSelectedDate,
   onDateChange,
 }: MapViewportProps) {
   const t = useTranslations("map");
@@ -50,10 +52,13 @@ export function MapViewport({
 
   const [selectedDatasetId, setSelectedDatasetId] = useState(datasetId);
   const [selectedDate, setSelectedDate] = useState<string | undefined>(
-    DATASET_LOOKUP.get(datasetId)?.defaultDate,
+    externalSelectedDate ?? DATASET_LOOKUP.get(datasetId)?.defaultDate,
   );
   const [overlaySelection, setOverlaySelection] = useState<Record<string, boolean>>({});
   const [mapReady, setMapReady] = useState(false);
+  const prevDatasetIdRef = useRef<string | undefined>(datasetId);
+  const prevDateRef = useRef<string | undefined>(externalSelectedDate ?? DATASET_LOOKUP.get(datasetId)?.defaultDate);
+  const hasInitialisedRef = useRef(false);
 
   const dataset = useMemo(() => DATASET_LOOKUP.get(selectedDatasetId), [selectedDatasetId]);
 
@@ -98,20 +103,29 @@ export function MapViewport({
     if (!dataset) return;
     const derivedDates = availableDates && availableDates.length > 0 ? availableDates : dataset.availableDates ?? [];
     const dates = derivedDates.length > 0 ? derivedDates : dataset.availableDates ?? [];
-    const defaultDate = dataset.supportsTime ? dataset.defaultDate ?? dates[0] : undefined;
+    const defaultDate = dataset.supportsTime ? externalSelectedDate ?? dataset.defaultDate ?? dates[0] : undefined;
     setSelectedDate(defaultDate);
     setOverlaySelection(
       Object.fromEntries(dataset.overlays?.map((overlay) => [overlay.id, true]) ?? []),
     );
     onDatasetChange?.(dataset);
-    onDateChange?.(defaultDate);
     if (mapRef.current) {
       const minZoom = dataset.minZoom ?? DEFAULT_MIN_ZOOM;
       const nativeMaxZoom = dataset.nativeMaxZoom ?? dataset.maxZoom ?? DEFAULT_MAX_ZOOM;
       mapRef.current.setMinZoom(minZoom);
       mapRef.current.setMaxZoom(nativeMaxZoom + ZOOM_EPSILON);
     }
-  }, [dataset, onDatasetChange, availableDates, onDateChange]);
+
+    const datasetChanged = prevDatasetIdRef.current !== dataset.id;
+    const dateChanged = prevDateRef.current !== defaultDate;
+    if (!hasInitialisedRef.current || datasetChanged || (dataset.supportsTime && !externalSelectedDate && dateChanged)) {
+      onDateChange?.({ date: defaultDate, dataset });
+      hasInitialisedRef.current = true;
+    }
+
+    prevDatasetIdRef.current = dataset.id;
+    prevDateRef.current = defaultDate;
+  }, [dataset, onDatasetChange, availableDates, onDateChange, externalSelectedDate]);
 
   const clearDatasetLayers = useCallback((map: MapLibreMap) => {
     const style = map.getStyle();
@@ -257,7 +271,10 @@ export function MapViewport({
   const handleDateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value || undefined;
     setSelectedDate(value);
-    onDateChange?.(value);
+    prevDateRef.current = value;
+    if (dataset) {
+      onDateChange?.({ date: value, dataset });
+    }
   };
 
   const handleOverlayToggle = (overlayId: string) => {

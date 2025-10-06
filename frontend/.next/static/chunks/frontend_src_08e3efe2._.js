@@ -18,6 +18,7 @@ const DATASETS = [
         attribution: "NASA GIBS / Blue Marble",
         minZoom: 2,
         maxZoom: 9,
+        nativeMaxZoom: 9,
         tileSize: 256,
         initialView: {
             center: [
@@ -34,6 +35,7 @@ const DATASETS = [
             "2024-07-01"
         ],
         defaultDate: "2024-10-01",
+        layerId: "MODIS_Terra_CorrectedReflectance_TrueColor",
         getTileUrls: (param)=>{
             let { date } = param;
             const day = date !== null && date !== void 0 ? date : "2024-10-01";
@@ -50,6 +52,7 @@ const DATASETS = [
         attribution: "NASA GIBS / VIIRS",
         minZoom: 2,
         maxZoom: 8,
+        nativeMaxZoom: 8,
         tileSize: 256,
         initialView: {
             center: [
@@ -64,6 +67,7 @@ const DATASETS = [
             "2024-09-05"
         ],
         defaultDate: "2024-10-01",
+        layerId: "VIIRS_SNPP_DayNightBand_ENCC",
         getTileUrls: (param)=>{
             let { date } = param;
             const day = date !== null && date !== void 0 ? date : "2024-10-01";
@@ -80,6 +84,7 @@ const DATASETS = [
         attribution: "NASA / JPL / MSSS",
         minZoom: 2,
         maxZoom: 7,
+        nativeMaxZoom: 7,
         tileSize: 512,
         initialView: {
             center: [
@@ -110,6 +115,7 @@ const DATASETS = [
         attribution: "NASA / GSFC / Arizona State University",
         minZoom: 2,
         maxZoom: 8,
+        nativeMaxZoom: 8,
         tileSize: 512,
         initialView: {
             center: [
@@ -141,6 +147,7 @@ const DATASETS = [
         attribution: "NASA / ESA / JHU",
         minZoom: 0,
         maxZoom: 12,
+        nativeMaxZoom: 12,
         tileSize: 512,
         initialView: {
             center: [
@@ -386,16 +393,19 @@ const DEFAULT_MAX_ZOOM = 18;
 const ZOOM_EPSILON = 0.05;
 var _DATASETS__id;
 function MapViewport(param) {
-    let { datasetId = (_DATASETS__id = (_DATASETS_ = __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$data$2f$datasets$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DATASETS"][0]) === null || _DATASETS_ === void 0 ? void 0 : _DATASETS_.id) !== null && _DATASETS__id !== void 0 ? _DATASETS__id : "earth-true-color", previewUrl, layerName, timestamp, metadata, attribution, onDatasetChange, className, availableDates, onDateChange } = param;
-    var _DATASET_LOOKUP_get;
+    let { datasetId = (_DATASETS__id = (_DATASETS_ = __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$data$2f$datasets$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DATASETS"][0]) === null || _DATASETS_ === void 0 ? void 0 : _DATASETS_.id) !== null && _DATASETS__id !== void 0 ? _DATASETS__id : "earth-true-color", previewUrl, layerName, timestamp, metadata, attribution, onDatasetChange, className, availableDates, selectedDate: externalSelectedDate, onDateChange } = param;
+    var _DATASET_LOOKUP_get, _DATASET_LOOKUP_get1;
     _s();
     const t = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$hooks$2f$useTranslations$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"])("map");
     const containerRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const mapRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const [selectedDatasetId, setSelectedDatasetId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(datasetId);
-    const [selectedDate, setSelectedDate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])((_DATASET_LOOKUP_get = __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$data$2f$datasets$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DATASET_LOOKUP"].get(datasetId)) === null || _DATASET_LOOKUP_get === void 0 ? void 0 : _DATASET_LOOKUP_get.defaultDate);
+    const [selectedDate, setSelectedDate] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(externalSelectedDate !== null && externalSelectedDate !== void 0 ? externalSelectedDate : (_DATASET_LOOKUP_get = __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$data$2f$datasets$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DATASET_LOOKUP"].get(datasetId)) === null || _DATASET_LOOKUP_get === void 0 ? void 0 : _DATASET_LOOKUP_get.defaultDate);
     const [overlaySelection, setOverlaySelection] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])({});
     const [mapReady, setMapReady] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const prevDatasetIdRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(datasetId);
+    const prevDateRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(externalSelectedDate !== null && externalSelectedDate !== void 0 ? externalSelectedDate : (_DATASET_LOOKUP_get1 = __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$data$2f$datasets$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DATASET_LOOKUP"].get(datasetId)) === null || _DATASET_LOOKUP_get1 === void 0 ? void 0 : _DATASET_LOOKUP_get1.defaultDate);
+    const hasInitialisedRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(false);
     const dataset = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
         "MapViewport.useMemo[dataset]": ()=>__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$data$2f$datasets$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DATASET_LOOKUP"].get(selectedDatasetId)
     }["MapViewport.useMemo[dataset]"], [
@@ -453,8 +463,12 @@ function MapViewport(param) {
         "MapViewport.useEffect": ()=>{
             var _dataset_overlays;
             if (!dataset) return;
-            var _dataset_defaultDate;
-            const defaultDate = (_dataset_defaultDate = dataset.defaultDate) !== null && _dataset_defaultDate !== void 0 ? _dataset_defaultDate : availableDates === null || availableDates === void 0 ? void 0 : availableDates[0];
+            var _dataset_availableDates;
+            const derivedDates = availableDates && availableDates.length > 0 ? availableDates : (_dataset_availableDates = dataset.availableDates) !== null && _dataset_availableDates !== void 0 ? _dataset_availableDates : [];
+            var _dataset_availableDates1;
+            const dates = derivedDates.length > 0 ? derivedDates : (_dataset_availableDates1 = dataset.availableDates) !== null && _dataset_availableDates1 !== void 0 ? _dataset_availableDates1 : [];
+            var _ref;
+            const defaultDate = dataset.supportsTime ? (_ref = externalSelectedDate !== null && externalSelectedDate !== void 0 ? externalSelectedDate : dataset.defaultDate) !== null && _ref !== void 0 ? _ref : dates[0] : undefined;
             setSelectedDate(defaultDate);
             var _dataset_overlays_map;
             setOverlaySelection(Object.fromEntries((_dataset_overlays_map = (_dataset_overlays = dataset.overlays) === null || _dataset_overlays === void 0 ? void 0 : _dataset_overlays.map({
@@ -464,21 +478,32 @@ function MapViewport(param) {
                     ]
             }["MapViewport.useEffect"])) !== null && _dataset_overlays_map !== void 0 ? _dataset_overlays_map : []));
             onDatasetChange === null || onDatasetChange === void 0 ? void 0 : onDatasetChange(dataset);
-            onDateChange === null || onDateChange === void 0 ? void 0 : onDateChange(defaultDate);
             if (mapRef.current) {
                 var _dataset_minZoom;
                 const minZoom = (_dataset_minZoom = dataset.minZoom) !== null && _dataset_minZoom !== void 0 ? _dataset_minZoom : DEFAULT_MIN_ZOOM;
-                var _dataset_maxZoom;
-                const maxZoom = (_dataset_maxZoom = dataset.maxZoom) !== null && _dataset_maxZoom !== void 0 ? _dataset_maxZoom : DEFAULT_MAX_ZOOM;
+                var _dataset_nativeMaxZoom, _ref1;
+                const nativeMaxZoom = (_ref1 = (_dataset_nativeMaxZoom = dataset.nativeMaxZoom) !== null && _dataset_nativeMaxZoom !== void 0 ? _dataset_nativeMaxZoom : dataset.maxZoom) !== null && _ref1 !== void 0 ? _ref1 : DEFAULT_MAX_ZOOM;
                 mapRef.current.setMinZoom(minZoom);
-                mapRef.current.setMaxZoom(maxZoom + ZOOM_EPSILON);
+                mapRef.current.setMaxZoom(nativeMaxZoom + ZOOM_EPSILON);
             }
+            const datasetChanged = prevDatasetIdRef.current !== dataset.id;
+            const dateChanged = prevDateRef.current !== defaultDate;
+            if (!hasInitialisedRef.current || datasetChanged || dataset.supportsTime && !externalSelectedDate && dateChanged) {
+                onDateChange === null || onDateChange === void 0 ? void 0 : onDateChange({
+                    date: defaultDate,
+                    dataset
+                });
+                hasInitialisedRef.current = true;
+            }
+            prevDatasetIdRef.current = dataset.id;
+            prevDateRef.current = defaultDate;
         }
     }["MapViewport.useEffect"], [
         dataset,
         onDatasetChange,
         availableDates,
-        onDateChange
+        onDateChange,
+        externalSelectedDate
     ]);
     const clearDatasetLayers = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
         "MapViewport.useCallback[clearDatasetLayers]": (map)=>{
@@ -518,8 +543,8 @@ function MapViewport(param) {
             const layerId = "".concat(DATASET_LAYER_PREFIX).concat(targetDataset.id);
             var _targetDataset_minZoom;
             const minZoom = (_targetDataset_minZoom = targetDataset.minZoom) !== null && _targetDataset_minZoom !== void 0 ? _targetDataset_minZoom : DEFAULT_MIN_ZOOM;
-            var _targetDataset_maxZoom;
-            const maxZoom = (_targetDataset_maxZoom = targetDataset.maxZoom) !== null && _targetDataset_maxZoom !== void 0 ? _targetDataset_maxZoom : DEFAULT_MAX_ZOOM;
+            var _targetDataset_nativeMaxZoom, _ref;
+            const maxZoom = (_ref = (_targetDataset_nativeMaxZoom = targetDataset.nativeMaxZoom) !== null && _targetDataset_nativeMaxZoom !== void 0 ? _targetDataset_nativeMaxZoom : targetDataset.maxZoom) !== null && _ref !== void 0 ? _ref : DEFAULT_MAX_ZOOM;
             var _targetDataset_tileSize;
             map.addSource(sourceId, {
                 type: "raster",
@@ -659,7 +684,13 @@ function MapViewport(param) {
     const handleDateChange = (event)=>{
         const value = event.target.value || undefined;
         setSelectedDate(value);
-        onDateChange === null || onDateChange === void 0 ? void 0 : onDateChange(value);
+        prevDateRef.current = value;
+        if (dataset) {
+            onDateChange === null || onDateChange === void 0 ? void 0 : onDateChange({
+                date: value,
+                dataset
+            });
+        }
     };
     const handleOverlayToggle = (overlayId)=>{
         setOverlaySelection((prev)=>({
@@ -691,7 +722,7 @@ function MapViewport(param) {
                                         children: "Dataset"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                        lineNumber: 279,
+                                        lineNumber: 298,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -703,18 +734,18 @@ function MapViewport(param) {
                                                 children: item.name
                                             }, item.id, false, {
                                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                lineNumber: 286,
+                                                lineNumber: 305,
                                                 columnNumber: 17
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                        lineNumber: 280,
+                                        lineNumber: 299,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                lineNumber: 278,
+                                lineNumber: 297,
                                 columnNumber: 11
                             }, this),
                             ((dataset === null || dataset === void 0 ? void 0 : dataset.supportsTime) || availableDates) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -725,7 +756,7 @@ function MapViewport(param) {
                                         children: "Date"
                                     }, void 0, false, {
                                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                        lineNumber: 294,
+                                        lineNumber: 313,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -738,7 +769,7 @@ function MapViewport(param) {
                                                 children: "Latest available"
                                             }, void 0, false, {
                                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                lineNumber: 300,
+                                                lineNumber: 319,
                                                 columnNumber: 13
                                             }, this),
                                             ((_ref = availableDates !== null && availableDates !== void 0 ? availableDates : dataset === null || dataset === void 0 ? void 0 : dataset.availableDates) !== null && _ref !== void 0 ? _ref : []).map((date)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -746,25 +777,25 @@ function MapViewport(param) {
                                                     children: date
                                                 }, date, false, {
                                                     fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                    lineNumber: 302,
+                                                    lineNumber: 321,
                                                     columnNumber: 15
                                                 }, this))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                        lineNumber: 295,
+                                        lineNumber: 314,
                                         columnNumber: 11
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                lineNumber: 293,
+                                lineNumber: 312,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                        lineNumber: 277,
+                        lineNumber: 296,
                         columnNumber: 9
                     }, this),
                     (dataset === null || dataset === void 0 ? void 0 : dataset.overlays) && dataset.overlays.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -775,7 +806,7 @@ function MapViewport(param) {
                                 children: "Overlays"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                lineNumber: 312,
+                                lineNumber: 331,
                                 columnNumber: 13
                             }, this),
                             dataset.overlays.map((overlay)=>{
@@ -790,7 +821,7 @@ function MapViewport(param) {
                                             onChange: ()=>handleOverlayToggle(overlay.id)
                                         }, void 0, false, {
                                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                            lineNumber: 315,
+                                            lineNumber: 334,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -798,26 +829,26 @@ function MapViewport(param) {
                                             children: overlay.name
                                         }, void 0, false, {
                                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                            lineNumber: 321,
+                                            lineNumber: 340,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, overlay.id, true, {
                                     fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                    lineNumber: 314,
+                                    lineNumber: 333,
                                     columnNumber: 15
                                 }, this);
                             })
                         ]
                     }, void 0, true, {
                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                        lineNumber: 311,
+                        lineNumber: 330,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                lineNumber: 276,
+                lineNumber: 295,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -828,7 +859,7 @@ function MapViewport(param) {
                         className: "h-full w-full"
                     }, void 0, false, {
                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                        lineNumber: 329,
+                        lineNumber: 348,
                         columnNumber: 9
                     }, this),
                     previewUrl && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -840,17 +871,17 @@ function MapViewport(param) {
                                 className: "h-full w-full object-cover"
                             }, void 0, false, {
                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                lineNumber: 333,
+                                lineNumber: 352,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                            lineNumber: 332,
+                            lineNumber: 351,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                        lineNumber: 331,
+                        lineNumber: 350,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -868,7 +899,7 @@ function MapViewport(param) {
                                                     children: t.badge
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                    lineNumber: 341,
+                                                    lineNumber: 360,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -876,13 +907,13 @@ function MapViewport(param) {
                                                     children: (_dataset_name = dataset === null || dataset === void 0 ? void 0 : dataset.name) !== null && _dataset_name !== void 0 ? _dataset_name : t.headingFallback
                                                 }, void 0, false, {
                                                     fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                    lineNumber: 342,
+                                                    lineNumber: 361,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                            lineNumber: 340,
+                                            lineNumber: 359,
                                             columnNumber: 15
                                         }, this),
                                         attribution || (dataset === null || dataset === void 0 ? void 0 : dataset.attribution) ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -890,13 +921,13 @@ function MapViewport(param) {
                                             children: attribution !== null && attribution !== void 0 ? attribution : dataset === null || dataset === void 0 ? void 0 : dataset.attribution
                                         }, void 0, false, {
                                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                            lineNumber: 345,
+                                            lineNumber: 364,
                                             columnNumber: 17
                                         }, this) : null
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                    lineNumber: 339,
+                                    lineNumber: 358,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -909,20 +940,20 @@ function MapViewport(param) {
                                                         className: "mt-1 inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-blue-400"
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                        lineNumber: 353,
+                                                        lineNumber: 372,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                         children: item
                                                     }, void 0, false, {
                                                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                        lineNumber: 354,
+                                                        lineNumber: 373,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, item, true, {
                                                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                                lineNumber: 352,
+                                                lineNumber: 371,
                                                 columnNumber: 17
                                             }, this)),
                                         (dataset === null || dataset === void 0 ? void 0 : dataset.description) && !metadata && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
@@ -930,40 +961,40 @@ function MapViewport(param) {
                                             children: dataset.description
                                         }, void 0, false, {
                                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                            lineNumber: 358,
+                                            lineNumber: 377,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                                    lineNumber: 350,
+                                    lineNumber: 369,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                            lineNumber: 338,
+                            lineNumber: 357,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                        lineNumber: 337,
+                        lineNumber: 356,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/frontend/src/components/MapViewport.tsx",
-                lineNumber: 328,
+                lineNumber: 347,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/frontend/src/components/MapViewport.tsx",
-        lineNumber: 275,
+        lineNumber: 294,
         columnNumber: 5
     }, this);
 }
-_s(MapViewport, "rNrWoL2ieFk/0dNJ7jxQ59TstZQ=", false, function() {
+_s(MapViewport, "iEbJqh+Va8PusTa9y8LbnkbEmSA=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$hooks$2f$useTranslations$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"]
     ];
@@ -2665,7 +2696,9 @@ function Home() {
         columnNumber: 5
     }, this);
     const mapViewport = (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useMemo"])({
-        "Home.useMemo[mapViewport]": ()=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$components$2f$MapViewport$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+        "Home.useMemo[mapViewport]": ()=>{
+            var _preview_time;
+            return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$frontend$2f$src$2f$components$2f$MapViewport$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                 datasetId: selectedDatasetId,
                 previewUrl: preview === null || preview === void 0 ? void 0 : preview.image,
                 layerName: preview === null || preview === void 0 ? void 0 : preview.layer,
@@ -2681,21 +2714,24 @@ function Home() {
                 }["Home.useMemo[mapViewport]"],
                 className: "min-h-[60vh] xl:min-h-[66vh] 2xl:min-h-[70vh]",
                 availableDates: availableDates,
+                selectedDate: preview === null || preview === void 0 ? void 0 : (_preview_time = preview.time) === null || _preview_time === void 0 ? void 0 : _preview_time.slice(0, 10),
                 onDateChange: {
-                    "Home.useMemo[mapViewport]": (date)=>{
-                        if (preview && date) {
-                            fetchPreview({
-                                layer: preview.layer,
-                                startDate: date
-                            });
-                        }
+                    "Home.useMemo[mapViewport]": (param)=>{
+                        let { dataset, date } = param;
+                        var _dataset_layerId;
+                        const nextLayer = (_dataset_layerId = dataset.layerId) !== null && _dataset_layerId !== void 0 ? _dataset_layerId : dataset.id;
+                        fetchPreview({
+                            layer: nextLayer,
+                            startDate: date
+                        });
                     }
                 }["Home.useMemo[mapViewport]"]
             }, void 0, false, {
                 fileName: "[project]/frontend/src/app/page.tsx",
                 lineNumber: 123,
                 columnNumber: 7
-            }, this)
+            }, this);
+        }
     }["Home.useMemo[mapViewport]"], [
         availableDates,
         fetchPreview,

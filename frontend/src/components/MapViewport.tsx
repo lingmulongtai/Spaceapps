@@ -79,11 +79,12 @@ export function MapViewport({
       attributionControl: true,
     });
 
-    map.on("load", () => setMapReady(true));
+    const handleLoad = () => setMapReady(true);
+    map.on("load", handleLoad);
     mapRef.current = map;
 
     return () => {
-      map.off("load", () => setMapReady(true));
+      map.off("load", handleLoad);
       map.remove();
       mapRef.current = null;
     };
@@ -99,6 +100,10 @@ export function MapViewport({
     );
     onDatasetChange?.(dataset);
     onDateChange?.(defaultDate);
+    if (mapRef.current) {
+      mapRef.current.setMinZoom(dataset.minZoom ?? 0);
+      mapRef.current.setMaxZoom(dataset.maxZoom ?? 22);
+    }
   }, [dataset, onDatasetChange, availableDates, onDateChange]);
 
   const clearDatasetLayers = useCallback((map: MapLibreMap) => {
@@ -133,6 +138,9 @@ export function MapViewport({
         type: "raster",
         tiles: tileUrls,
         tileSize: targetDataset.tileSize ?? 256,
+        minzoom: targetDataset.minZoom,
+        maxzoom: targetDataset.maxZoom,
+        scheme: "xyz",
       });
 
       map.addLayer({
@@ -142,6 +150,8 @@ export function MapViewport({
         paint: {
           "raster-opacity": 0.85,
         },
+        minzoom: targetDataset.minZoom,
+        maxzoom: targetDataset.maxZoom,
       });
 
       targetDataset.overlays
@@ -154,6 +164,9 @@ export function MapViewport({
             type: "raster",
             tiles: overlay.getTileUrls({ date }),
             tileSize: targetDataset.tileSize ?? 256,
+            minzoom: targetDataset.minZoom,
+            maxzoom: targetDataset.maxZoom,
+            scheme: "xyz",
           });
 
           map.addLayer({
@@ -163,6 +176,8 @@ export function MapViewport({
             paint: {
               "raster-opacity": overlay.opacity ?? 0.6,
             },
+            minzoom: targetDataset.minZoom,
+            maxzoom: targetDataset.maxZoom,
           });
         });
     },

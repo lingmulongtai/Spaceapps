@@ -1,6 +1,6 @@
 import type { DatasetDefinition } from "@/types/datasets";
 
-const GIBS_BASE = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best";
+const GIBS_BASE = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/all";
 
 export const DATASETS: DatasetDefinition[] = [
   {
@@ -12,7 +12,7 @@ export const DATASETS: DatasetDefinition[] = [
     attribution: "NASA GIBS / Blue Marble",
     minZoom: 2,
     maxZoom: 9,
-    tileSize: 256,
+    tileSize: 512,
     initialView: { center: [0, 0], zoom: 2 },
     supportsTime: true,
     availableDates: [
@@ -37,7 +37,7 @@ export const DATASETS: DatasetDefinition[] = [
     attribution: "NASA GIBS / VIIRS",
     minZoom: 2,
     maxZoom: 8,
-    tileSize: 256,
+    tileSize: 512,
     initialView: { center: [0, 20], zoom: 2 },
     supportsTime: true,
     availableDates: ["2024-10-01", "2024-09-05"],
